@@ -54,18 +54,18 @@ function App() {
         >
           <h1>Curate Your Digital Library</h1>
           <p>
-            The ultimate template for book lovers. Manage your collection with a 
+            The ultimate template for book lovers. Manage your collection with a
             modern, fast, and beautiful interface powered by React and Express.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-            <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button onClick={() => window.location.href = '/AddBook'} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={20} /> Add New Book
             </button>
-            <button style={{ 
-              background: 'transparent', 
-              border: '1px solid var(--glass-border)', 
-              color: 'white', 
-              padding: '0.75rem 1.5rem', 
+            <button style={{
+              background: 'transparent',
+              border: '1px solid var(--glass-border)',
+              color: 'white',
+              padding: '0.75rem 1.5rem',
               borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
@@ -82,7 +82,7 @@ function App() {
           <p>Loading your collection...</p>
         ) : (
           books.map((book, index) => (
-            <motion.div 
+            <motion.div
               key={book.id}
               className="glass-card"
               initial={{ opacity: 0, scale: 0.9 }}
