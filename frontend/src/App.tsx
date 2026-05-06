@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Book, Library, Search, Plus, Globe, ExternalLink } from 'lucide-react'
+import { Book, Library, ExternalLink, LogOut } from 'lucide-react'
 import { motion } from 'framer-motion'
+import LoginPage from './components/LoginPage'
+import RegisterPage from './components/RegisterPage'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import './App.css'
 
 interface BookItem {
@@ -9,27 +12,24 @@ interface BookItem {
   author: string;
 }
 
-function App() {
+function LibraryApp() {
+  const { user, logout } = useAuth()
   const [books, setBooks] = useState<BookItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/books')
-      .then(res => res.json())
-      .then(data => {
-        setBooks(data)
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error("Failed to fetch books:", err)
-        // Fallback data if server is not running
-        setBooks([
-          { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald' },
-          { id: 2, title: '1984', author: 'George Orwell' },
-          { id: 3, title: 'To Kill a Mockingbird', author: 'Harper Lee' }
-        ])
-        setLoading(false)
-      })
+    // In a real app, you would fetch from the Laravel API here
+    // fetch('http://localhost:8000/api/books', { headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` } })
+
+    // Using mock data for now
+    setTimeout(() => {
+      setBooks([
+        { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald' },
+        { id: 2, title: '1984', author: 'George Orwell' },
+        { id: 3, title: 'To Kill a Mockingbird', author: 'Harper Lee' }
+      ])
+      setLoading(false)
+    }, 800)
   }, [])
 
   return (
@@ -40,40 +40,17 @@ function App() {
           <span style={{ fontSize: '1.5rem', fontWeight: 700 }}>MyLibrary</span>
         </div>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Dashboard</a>
-          <a href="#" style={{ color: '#94a3b8', textDecoration: 'none' }}>Collections</a>
-          <button className="btn-primary">Connect Wallet</button>
+          <span style={{ color: 'white', fontSize: '0.9rem' }}>Halo, {user?.name}</span>
+          <button onClick={logout} className="btn-primary" style={{ background: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <LogOut size={18} /> Keluar
+          </button>
         </div>
       </nav>
 
       <header className="hero">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1>Curate Your Digital Library</h1>
-          <p>
-            The ultimate template for book lovers. Manage your collection with a
-            modern, fast, and beautiful interface powered by React and Express.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-            <button onClick={() => window.location.href = '/AddBook'} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Plus size={20} /> Add New Book
-            </button>
-            <button style={{
-              background: 'transparent',
-              border: '1px solid var(--glass-border)',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              <Search size={20} /> Explore
-            </button>
-          </div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1>Welcome, {user?.name}</h1>
+          <p>Manage your personal collection with ease.</p>
         </motion.div>
       </header>
 
@@ -102,14 +79,32 @@ function App() {
           ))
         )}
       </main>
-
-      <footer style={{ padding: '4rem 2rem', textAlign: 'center', borderTop: '1px solid var(--glass-border)', marginTop: '4rem' }}>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>&copy; 2026 MyLibrary Template. Built with ❤️ by Antigravity.</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-          <Globe size={24} color="#94a3b8" />
-        </div>
-      </footer>
     </div>
+  )
+}
+
+function AppContent() {
+  const { isAuthenticated, loading } = useAuth()
+  const [showRegister, setShowRegister] = useState(false)
+
+  if (loading) return <div>Loading...</div>
+
+  if (!isAuthenticated) {
+    return showRegister ?
+      <div onClick={() => setShowRegister(false)}><RegisterPage /></div> :
+      <div onClick={(e) => {
+        if ((e.target as HTMLElement).innerText.includes('Daftar sekarang')) setShowRegister(true)
+      }}><LoginPage /></div>
+  }
+
+  return <LibraryApp />
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 
